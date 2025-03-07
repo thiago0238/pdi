@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Filtro de Média - Processamento de Imagens</title>
+    <title>Filtro de Imagem - Processamento de Imagens</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -24,7 +24,7 @@
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-        input[type="file"] {
+        input[type="file"], select {
             margin: 10px;
             padding: 5px;
         }
@@ -65,10 +65,16 @@
     </style>
 </head>
 <body>
-    <h1>Filtro de Média - Processamento de Imagens</h1>
+    <h1>Filtro de Imagem - Processamento de Imagens</h1>
     
     <form action="/" method="post" enctype="multipart/form-data">
         <input type="file" name="file" accept="image/*">
+        <select name="filter">
+            <option value="media">Média</option>
+            <option value="mediana">Mediana</option>
+            <option value="maximo">Máximo</option>
+            <option value="minimo">Mínimo</option>
+        </select>
         <button type="submit">Enviar</button>
     </form>
 
