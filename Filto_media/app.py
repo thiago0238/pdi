@@ -1,13 +1,15 @@
 import os
+from matplotlib import pyplot as plt
 import numpy as np
 from flask import Flask, request, render_template, send_from_directory
 from PIL import Image
+import cv2
 
 app = Flask(__name__)
 
 UPLOAD_FOLDER = "uploads"
 PROCESSED_FOLDER = "processed"
-ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "tiff", "bmp"}
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "tif", "bmp"}
 
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config["PROCESSED_FOLDER"] = PROCESSED_FOLDER
@@ -17,6 +19,25 @@ os.makedirs(PROCESSED_FOLDER, exist_ok=True)
 
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def gerar_histograma(img_array, filename, prefixo):
+    """Gera o histograma da imagem e salva."""
+    plt.figure()
+    plt.hist(img_array.ravel(), bins=256, color='gray', alpha=0.7)
+    plt.title(f"Histograma {prefixo}")
+    plt.xlabel("Intensidade")
+    plt.ylabel("Frequência")
+
+    hist_path = os.path.join(app.config["PROCESSED_FOLDER"], f"histograma_{prefixo}_{filename}.png")
+    plt.savefig(hist_path)
+    plt.close()
+    return hist_path
+
+def equalizar_histograma(img_array):
+    """Equaliza o histograma apenas no canal de luminância (Y)."""
+    img_yuv = cv2.cvtColor(img_array, cv2.COLOR_RGB2YUV)
+    img_yuv[:, :, 0] = cv2.equalizeHist(img_yuv[:, :, 0])
+    return cv2.cvtColor(img_yuv, cv2.COLOR_YUV2RGB)
 
 def aplicar_filtro_media(img_array, kernel_size=3):
     altura, largura, canais = img_array.shape
@@ -101,6 +122,27 @@ def upload_file():
                 img_filtrada = aplicar_filtro_maximo(img_array)
             elif filter_type == "minimo":
                 img_filtrada = aplicar_filtro_minimo(img_array)
+            elif filter_type == "histograma":
+                # Gerar histograma da imagem original
+                hist_original_path = gerar_histograma(img_array, filename, "original")
+
+                # Equalizar histograma
+                img_equalizada = equalizar_histograma(img_array)
+                
+                # Gerar histograma da imagem equalizada
+                hist_equalizado_path = gerar_histograma(img_equalizada, filename, "equalizado")
+
+                # Salvar imagem equalizada
+                processed_path = os.path.join(app.config["PROCESSED_FOLDER"], filename)
+                Image.fromarray(img_equalizada).save(processed_path)
+
+                return render_template(
+                    "index.html",
+                    original_image=filename,
+                    filtered_image=filename,
+                    histograma_original=os.path.basename(hist_original_path),
+                    histograma_equalizado=os.path.basename(hist_equalizado_path)
+                )
             else:
                 return "Filtro inválido."
 

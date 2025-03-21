@@ -45,6 +45,7 @@
             justify-content: center;
             gap: 30px;
             margin-top: 20px;
+            flex-wrap: wrap;
         }
         .image-container {
             text-align: center;
@@ -52,6 +53,7 @@
             padding: 10px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 300px;
         }
         img {
             max-width: 100%;
@@ -74,6 +76,7 @@
             <option value="mediana">Mediana</option>
             <option value="maximo">Máximo</option>
             <option value="minimo">Mínimo</option>
+            <option value="histograma">Histograma</option>
         </select>
         <button type="submit">Enviar</button>
     </form>
@@ -89,6 +92,16 @@
             <span class="image-title">Imagem Filtrada</span>
             <img src="{{ url_for('processed_file', filename=filtered_image) }}" alt="Imagem Filtrada">
         </div>
+        {% if histograma_original and histograma_equalizado %}
+        <div class="image-container">
+            <span class="image-title">Histograma Original</span>
+            <img src="{{ url_for('processed_file', filename=histograma_original) }}" alt="Histograma Original">
+        </div>
+        <div class="image-container">
+            <span class="image-title">Histograma Equalizado</span>
+            <img src="{{ url_for('processed_file', filename=histograma_equalizado) }}" alt="Histograma Equalizado">
+        </div>
+        {% endif %}
     </div>
     {% endif %}
 </body>
